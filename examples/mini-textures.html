@@ -102,87 +102,19 @@ void main() {
     }
     updateCanvas(0);
 
-    // A cubemap drawn to a canvas with a circle on each face.
-    const cubemapCtx = document.createElement("canvas").getContext("2d");
-    const size = 40;
-    cubemapCtx.canvas.width  = size * 6;
-    cubemapCtx.canvas.height = size;
-    cubemapCtx.fillStyle = "#888";
-    for (let ff = 0; ff < 6; ++ff) {
-      const color = chroma.hsv((baseHue + ff * 10) % 360, 1 - ff / 6, 1);
-      cubemapCtx.fillStyle = color.darken().hex();
-      cubemapCtx.fillRect(size * ff, 0, size, size);
-      cubemapCtx.save();
-      cubemapCtx.translate(size * (ff + 0.5), size * 0.5);
-      cubemapCtx.beginPath();
-      cubemapCtx.arc(0, 0, size * 0.3, 0, Math.PI * 2);
-      cubemapCtx.fillStyle = color.hex();
-      cubemapCtx.fill();
-      cubemapCtx.restore();
-    }
-
-    // make 6 canvases to show loading from 6 element
-    const cubeFaceCanvases = [];
-    for (let ff = 0; ff < 6; ++ff) {
-      const canvas = document.createElement("canvas");
-      canvas.width = 128;
-      canvas.height = 128;
-      const ctx = canvas.getContext("2d");
-      const color = chroma.hsv((baseHue + ff * 10) % 360, 1 - ff / 6, 1);
-      ctx.fillStyle = color.darken().hex();
-      ctx.fillRect(0, 0, 128, 128);
-      ctx.translate(64, 64);
-      ctx.rotate(Math.PI * .25);
-      ctx.fillStyle = color.hex();
-      ctx.fillRect(-40, -40, 80, 80);
-      cubeFaceCanvases.push(canvas);
-    }
-
     const textures = twgl.createTextures(gl, {
-      // a power of 2 image
-      hftIcon: { src: "images/hft-icon-16.png", mag: gl.NEAREST },
-      // a non-power of 2 image
-      clover: { src: "images/clover.jpg" },
-      // From a canvas
-      fromCanvas: { src: ctx.canvas },
       // A 2x2 pixel texture from a JavaScript array
       checker: {
         mag: gl.NEAREST,
         min: gl.LINEAR,
         src: [
-          255, 255, 255, 255,
+          255, 0, 0, 255,  // red
           192, 192, 192, 255,
           192, 192, 192, 255,
           255, 255, 255, 255,
         ],
       },
-      // a 1x8 pixel texture from a typed array.
-      stripe: {
-        mag: gl.NEAREST,
-        min: gl.LINEAR,
-        format: gl.LUMINANCE,
-        src: new Uint8Array([
-          255,
-          128,
-          255,
-          128,
-          255,
-          128,
-          255,
-          128,
-        ]),
-        width: 1,
-      },
     });
-
-    // This is soley to make it easy to pick textures at random
-    const twoDTextures = [
-      textures.checker,
-      textures.stripe,
-      textures.hftIcon,
-      textures.clover,
-      textures.fromCanvas,
-    ];
 
     const objects = [];
     const drawObjects = [];
@@ -196,7 +128,7 @@ void main() {
           programInfo = onePointProgramInfo;
           uniforms = {
             u_diffuseMult: chroma.hsv((baseHue + rand(0, 60)) % 360, 0.4, 0.8).gl(),
-            u_diffuse: twoDTextures[rand(0, twoDTextures.length) | 0],
+            u_diffuse: textures.checker,
             u_viewInverse: camera,
             u_world: m4.identity(),
             u_worldInverseTranspose: m4.identity(),
