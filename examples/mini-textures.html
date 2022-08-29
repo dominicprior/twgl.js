@@ -115,8 +115,8 @@ void main() {
   gl_FragColor = color;
 }
   </script>
-  <script src="../3rdparty/chroma.min.js"></script>
-  <script src="../dist/4.x/twgl-full.js"></script>
+  <script src="chroma.min.js"></script>
+  <script src="twgl-full.js"></script>
   <script type="module">
     twgl.setDefaults({attribPrefix: "a_"});
     const m4 = twgl.m4;
@@ -226,7 +226,7 @@ void main() {
         mag: gl.NEAREST,
         min: gl.LINEAR,
         src: [
-          255, 0, 0, 255,
+          255, 255, 255, 255,
           192, 192, 192, 255,
           192, 192, 192, 255,
           255, 255, 255, 255,
