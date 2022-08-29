@@ -9,25 +9,7 @@
     see: http://github.com/greggman/twgl.js for details
 
     -->
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
-    <meta property="og:title" content="TWGL.js - textures" />
-    <meta property="og:type" content="website" />
-    <meta property="og:image" content="http://twgljs.org/examples/screenshots/textures.png" />
-    <meta property="og:description" content="TWGL.js - textures" />
-    <meta property="og:url" content="http://twgljs.org" />
-
-    <meta name="twitter:card" content="summary_large_image">
-    <meta name="twitter:site" content="@greggman">
-    <meta name="twitter:creator" content="@greggman">
-    <meta name="twitter:domain" content="twgljs.org">
-    <meta name="twitter:title" content="TWGL.js - textures">
-    <meta name="twitter:url" content="http://twgljs.org/examples/textures.html">
-    <meta name="twitter:description" content="TWGL.js - textures">
-    <meta name="twitter:image:src" content="http://twgljs.org/examples/screenshots/textures.png">
-
-    <link href="/resources/images/twgljs-icon.png" rel="shortcut icon" type="image/png">
-
-    <title>twgl.js - textures</title>
+    <title>mini</title>
     <style>
       body {
           margin: 0;
@@ -38,18 +20,10 @@
           width: 100vw;
           height: 100vh;
       }
-      #b {
-        position: absolute;
-        top: 10px;
-        width: 100%;
-        text-align: center;
-        z-index: 2;
-      }
     </style>
   </head>
   <body>
     <canvas id="c"></canvas>
-    <div id="b"><a href="http://twgljs.org">twgl.js</a> - textures</div>
   </body>
   <script id="one-point-vs" type="notjs">
 uniform mat4 u_worldViewProjection;
@@ -82,39 +56,7 @@ void main() {
   gl_FragColor = diffuseColor;
 }
   </script>
-  <script id="env-map-vs" type="notjs">
-uniform mat4 u_viewInverse;
-uniform mat4 u_world;
-uniform mat4 u_worldViewProjection;
-uniform mat4 u_worldInverseTranspose;
 
-attribute vec4 a_position;
-attribute vec3 a_normal;
-
-varying vec3 v_normal;
-varying vec3 v_surfaceToView;
-
-void main() {
-  v_normal = (u_worldInverseTranspose * vec4(a_normal, 0)).xyz;
-  v_surfaceToView = (u_viewInverse[3] - (u_world * a_position)).xyz;
-  gl_Position = u_worldViewProjection * a_position;
-}
-  </script>
-  <script id="env-map-fs" type="notjs">
-precision mediump float;
-
-uniform samplerCube u_texture;
-
-varying vec3 v_surfaceToView;
-varying vec3 v_normal;
-
-void main() {
-  vec3 normal = normalize(v_normal);
-  vec3 surfaceToView = normalize(v_surfaceToView);
-  vec4 color = textureCube(u_texture, -reflect(surfaceToView, normal));
-  gl_FragColor = color;
-}
-  </script>
   <script src="chroma.min.js"></script>
   <script src="twgl-full.js"></script>
   <script type="module">
@@ -122,7 +64,6 @@ void main() {
     const m4 = twgl.m4;
     const gl = document.querySelector("#c").getContext("webgl");
     const onePointProgramInfo = twgl.createProgramInfo(gl, ["one-point-vs", "one-point-fs"]);
-    const envMapProgramInfo = twgl.createProgramInfo(gl, ["env-map-vs", "env-map-fs"]);
 
     const shapes = [
       twgl.primitives.createCubeBufferInfo(gl, 2),
@@ -204,23 +145,6 @@ void main() {
       clover: { src: "images/clover.jpg" },
       // From a canvas
       fromCanvas: { src: ctx.canvas },
-      // A cubemap from 6 images
-      yokohama: {
-        target: gl.TEXTURE_CUBE_MAP,
-        src: [
-          'images/yokohama/posx.jpg',
-          'images/yokohama/negx.jpg',
-          'images/yokohama/posy.jpg',
-          'images/yokohama/negy.jpg',
-          'images/yokohama/posz.jpg',
-          'images/yokohama/negz.jpg',
-        ],
-      },
-      // A cubemap from 1 image (can be 1x6, 2x3, 3x2, 6x1)
-      goldengate: {
-        target: gl.TEXTURE_CUBE_MAP,
-        src: 'images/goldengate.jpg',
-      },
       // A 2x2 pixel texture from a JavaScript array
       checker: {
         mag: gl.NEAREST,
@@ -249,21 +173,6 @@ void main() {
         ]),
         width: 1,
       },
-      // a cubemap from array
-      cubemapFromArray: {
-        target: gl.TEXTURE_CUBE_MAP,
-        format: gl.RGBA,
-        src: [
-          0xF0, 0x80, 0x80, 0xFF,
-          0x80, 0xE0, 0x80, 0xFF,
-          0x80, 0x80, 0xD0, 0xFF,
-          0xC0, 0x80, 0x80, 0xFF,
-          0x80, 0xB0, 0x80, 0xFF,
-          0x80, 0x80, 0x00, 0xFF,
-        ],
-      },
-      cubemapFromCanvas: { target: gl.TEXTURE_CUBE_MAP, src: cubemapCtx.canvas },
-      cubemapFrom6Canvases: { target: gl.TEXTURE_CUBE_MAP, src: cubeFaceCanvases },
     });
 
     // This is soley to make it easy to pick textures at random
@@ -275,14 +184,6 @@ void main() {
       textures.fromCanvas,
     ];
 
-    const cubeTextures = [
-      textures.yokohama,
-      textures.goldengate,
-      textures.cubemapFromCanvas,
-      textures.cubemapFrom6Canvases,
-      textures.cubemapFromArray,
-    ];
-
     const objects = [];
     const drawObjects = [];
     const numObjects = 100;
@@ -290,9 +191,7 @@ void main() {
       let uniforms;
       let programInfo;
       let shape;
-      const renderType = rand(0, 2) | 0;
-      switch (renderType) {
-        case 0:  // checker
+
           shape = shapes[ii % shapes.length];
           programInfo = onePointProgramInfo;
           uniforms = {
@@ -303,21 +202,7 @@ void main() {
             u_worldInverseTranspose: m4.identity(),
             u_worldViewProjection: m4.identity(),
           };
-          break;
-        case 1:  // yokohama
-          shape = rand(0, 2) < 1 ? shapes[1] : shapes[3];
-          programInfo = envMapProgramInfo;
-          uniforms = {
-            u_texture: cubeTextures[rand(0, cubeTextures.length) | 0],
-            u_viewInverse: camera,
-            u_world: m4.identity(),
-            u_worldInverseTranspose: m4.identity(),
-            u_worldViewProjection: m4.identity(),
-          };
-          break;
-        default:
-          throw "wAT!";
-      }
+
       drawObjects.push({
         programInfo: programInfo,
         bufferInfo: shape,
@@ -333,6 +218,9 @@ void main() {
 
     function render(time) {
       time *= 0.001;
+      if (time > 1) {
+        return
+      }
       twgl.resizeCanvasToDisplaySize(gl.canvas);
       gl.viewport(0, 0, gl.canvas.width, gl.canvas.height);
 
@@ -375,7 +263,3 @@ void main() {
 
   </script>
 </html>
-
-
-
-
