@@ -25,35 +25,28 @@
   <body>
     <canvas id="c"></canvas>
   </body>
-  <script id="one-point-vs" type="notjs">
+  <script id="one-point-vs" type="notjs">#version 300 es
 uniform mat4 u_worldViewProjection;
-
-attribute vec4 a_position;
-attribute vec2 a_texcoord;
-
-varying vec4 v_position;
-varying vec2 v_texCoord;
-
+in vec4 a_position;
+in vec2 a_texcoord;
+out vec2 v_texCoord;
 void main() {
   v_texCoord = a_texcoord;
   gl_Position = u_worldViewProjection * a_position;
 }
   </script>
-  <script id="one-point-fs" type="notjs">
+  <script id="one-point-fs" type="notjs">#version 300 es
 precision mediump float;
-
-varying vec4 v_position;
-varying vec2 v_texCoord;
-
+in vec2 v_texCoord;
+out vec4 finalColour;
 uniform vec4 u_diffuseMult;
 uniform sampler2D u_diffuse;
-
 void main() {
-  vec4 diffuseColor = texture2D(u_diffuse, v_texCoord) * u_diffuseMult;
+  vec4 diffuseColor = texture(u_diffuse, v_texCoord) * u_diffuseMult;
   if (diffuseColor.a < 0.1) {
     discard;
   }
-  gl_FragColor = diffuseColor;
+  finalColour = diffuseColor;
 }
   </script>
 
@@ -62,7 +55,7 @@ void main() {
   <script type="module">
     twgl.setDefaults({attribPrefix: "a_"});
     const m4 = twgl.m4;
-    const gl = document.querySelector("#c").getContext("webgl");
+    const gl = document.querySelector("#c").getContext("webgl2");
     const onePointProgramInfo = twgl.createProgramInfo(gl, ["one-point-vs", "one-point-fs"]);
 
     const shapes = [
